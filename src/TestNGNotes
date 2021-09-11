@@ -1,0 +1,167 @@
+How to run?
+need to provide annotation @Test to consider a method as a test
+
+How to define multiple test within a same class?
+need to provide methods with @Test annotation
+
+Trigger test from the xml file?
+xml tree
+	Test Suite > Test Folders(Shell) > Test Cases
+	Test suite is kind of module --> bigger umbrella --> Loan
+	then, your test folder --> can be personal load, home load, car loan (define)
+	then test cases is your classes that are in your test folders
+	
+	Now, you have to define your classes inside the xml file, and all 
+	the classes defined under specific suite's test folder will be executed
+	in a single shot.
+	
+Prioritizing the tests
+	Under xml file, define your tests on basis of module:
+	<test name="Personal Loan">
+    <classes>
+      <class name="test.Demo"/>
+      <class name="test.Demo2"/>
+    </classes>
+ 	</test> 
+  
+  	<test name="Car Loan">
+  	<classes>
+  	  <class name="test.Demo3"/>
+  	  <class name="test.Demo4"/>
+  	</classes>
+    </test>
+ if other test case of different can be merged into one test, then no need to define
+ other test shell, just include the class name. (as above, home loan classes in car loan)
+ 
+ To run only specific test (eg: only car loan, or personal loan tests)
+ 	1. you can remove the other test in xml itself, and they will not run
+ 
+ Run only specific test and skip others within the same module, (Eg:In car loan
+ do not execute mobile test, rest web and api do execute)
+ 	you need to define method inside class tag in xml, The tests which you don't 
+ 	want to run mention it inside the exclude tag.
+ 	Initially we have it like,
+ 	 <class name="test.Demo"/> //starting and ending
+ 	Now,
+ 		<class name="test.Demo3>
+ 			<methods>
+ 				<exclude name="mobileLoginCarLoan"/>
+ 			</methods>
+ 		</class>
+ 
+ Similar to exclude, we have include, execute only api rest skip
+ 
+ exclude anything after mobile test cases--> mobile.*
+ 		<class name="test.Demo3>
+ 			<methods>
+ 				<exclude name="mobile.*"/>
+ 			</methods>
+ 		</class>
+ 
+We can have more than 1 xml file, and it should be at the project level
+
+How to run at package level
+	<test name="Personal Loan">
+		<packages>
+			<package name = "test"/>
+		<packages/> 
+	</test>
+	
+Annotations:
+	@BeforeSuite
+	@AfterSuite
+	@BeforeTest
+	@AfterTest
+	@BeforeClass
+	@AfterClass
+	@BeforeMethod
+	@AfterMethod
+	
+Order of execution -> Alphabetically
+
+Want to 
+	@Test(groups={"smoke"})
+	tell xml file to execute run 4 test cases everyday--> Groups those 
+	test cases that are tied with smoke tag
+	<test name="regression">
+		<groups>
+			<run>
+				<include name = "smoke"/>
+			</run>
+		</groups>
+		<classes>
+			<class name = "test.Demo"/>
+			<class name = "test.Demo2"/>
+		</classes>
+	</test>
+	
+	Similarly, you can exclude as well
+
+Ordering the test cases pre requisite to one method:
+	@Test(dependsOnMethods={"methodname"})
+	
+If you already know a defect linked to a test case, and you want to skip it while running
+add enabled=false , it will be skipped
+
+	@Test(enabled=false)
+	
+Can be grouped and enabled as well
+@Test(groups= {"smoke"},enabled=false)
+
+Parameterizing from xml
+	@Parameters({"NAME","USERNAME"})
+	
+	xml
+	<parameter name="URL" value="qaclickacademy.com"/>
+	<parameter name="USERNAME" value="iamriz007"/>
+	
+	define as per requirement, at suite level, test level, class level
+	only their it will be accessible and retrieve the value. if you have 
+	multiple parametes the corresponding parameter are to be defined in
+	method
+	Note: Suitable for gloabal params
+	
+DataProvider:
+	@DataProvider
+		If you want to run the same test case with multiple data sets
+		execute same test with 20 data --> 1 time with each data
+		
+		@DataProvider
+		public Object getData(){
+		Object[][] data= {{"",""},{"",""},{"",""}};
+		return data
+		
+		@Test(dataProvider="getData")
+		public void dataTest(String param1, String param2){
+			//code to validate data
+			//will run thrice
+		}
+		
+TestNG Listeners:
+	There are some listeners that will activate before and after your test
+	- failed test --> take screenshot (intelligently) [specific block]
+	- route to the block where screenshot
+	- it listens to your test case
+	- ITestListener interface which implements testNG listeners
+	- result.getName() -> testcase name
+	
+Run test parallelly:
+	- at suite level on xml pass parallel = "tests" thread-count="2"
+	<suite name="Loan Department" parallel="tests" thread-count="2">
+	Similarly, for tests level you can run multiple classes inside tests
+	- <test name="Personal Loan" parallel="classes" thread-count="2">
+	
+How to driver Global Values
+	- create .properties file and give your key values
+		browser = chrome
+		url = https:xyz.com
+	- java has the ability to read the property file and extract the values
+	- Now,to get the values from properties to your class
+		- Properties class - scan the value from .properties
+			create object for this class and provide the location
+				- create object for FileInputStream class and pass the location as an argument
+	Now,
+	Give knowlege to prop obj of fis object with
+	prop.load(fis);
+	prop.getProperty("browser") --> retrieve the global value from properties file
+	
